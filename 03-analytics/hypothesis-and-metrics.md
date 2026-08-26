@@ -1,17 +1,30 @@
-# Hypothesis & Success Metrics
+# Hypothesis & Success Metrics (Module 3)
 
-> **Module 3 · ★ Deliverable 3.** Repo file `03-analytics/hypothesis-and-metrics.md` — part of your submission.
-> Do the lab in the **Module 3 · Exercise Guide** (linked from the Module 3 deck), then click **⬇ Download .md** — it saves as this exact file. Commit it here.
-> It feeds the **Problem, Value & Hypothesis** slide of your Module 6 final deck.
+## Pre-work · Hypothesis check
+- **Role , who you are solving for (from M2):** Driver
+- **Goal , what this user is ultimately trying to achieve:** use the app to follow the route, receiving a timely update and push notification if the route has changed,
+- **Friction / moment of misery , the specific pain blocking their goal:** Reassignments take 8-15 minutes to reach the driver app, with no push notification on route changes, resulting in drivers acting on stale routes.
+- **Current workaround , the external tool or manual process they rely on (M2):** Dispatch has to contact the driver outside the app to notify of route changes.
+- **Problem Hook , your one-sentence framing of the business crisis (M1):** We must solve our driver app complexity issues by addressing the update lag and lack of push notifications so our drivers are working active routes and getting proper notifications.
+- **Value Proposition , the outcome your initiative promised to deliver (M1):** For RouteLogic Velocity's users and customers, we will streamline processes, removing layers to access high-frequency actions easily and eliminate manual workarounds, to protect our enterprise revenue and prove the platform is still the fastest tool on the market.
 
-## Finalized product hypothesis
+## Read your data snapshots
+- **Does the funnel data confirm your M2 friction point, or does it tell a different story? Note where the numbers align with the qualitative pain you found and where they diverge.:** _(not filled in)_
+- **Do the retention patterns align with the workaround your M2 persona used to find content? Note what the Mo. 0→1 drop suggests about the onboarding experience your persona described as frustrating.:** _(not filled in)_
+- **Does the LTV gap and the content mix (61% trending for Wanderers) confirm the moment of misery your persona described? Note which segment your persona is in and whether the data confirms their pain.:** _(not filled in)_
+- **Does the low adoption confirm your persona is burdened by tools they don’t use? Note whether the low scheduling adoption (42%) for coordinators matches your M2 moment of misery.:** No, they are burdened by tools they need to use and do not find value in the headline feature. 
+Yes, the low scheduling adoption (42%) for coordinators matches my M2 moment of misery.
+- **Does the workflow data match the manual process or hack you documented in M2? Note whether the specific drop-offs or time gaps explain why your persona avoids the digital tool.:** Yes, the workflow data matches the manual process documented in M2. The specific drop-offs and time gaps show my persona avoids the digital tool as each layer is more complicated with the app, forcing drivers and coordinators to use manual workarounds.
+- **Look at the CSAT heatmap. Which specific cell most directly maps to your persona’s friction? Note how the NPS trend justifies the urgency of your M1 Problem Hook.:** The Scheduling for Drivers (1.9)  cell on the CSAT heatmap most directly maps to my persona's friction. The NPS collapse from +18 to 12 in two years justifies the urgency of needing to resolve the scheduling update lag and lack of push notifications, it is having a snowball effect on our reporting and compliance as well.
 
-> Based on [qual + quant evidence], I believe that [solving X] for [persona] will result in [outcome], as measured by a [X%] change in [success metric]. I will protect [guardrail metric] and make a go/no-go decision after [decision window].
-
-## Success metrics
-
-| Metric | Type | Target | Why it matters |
-|---|---|---|---|
-| _North-star_ | | _____ | _____ |
-| _Leading indicator_ | | _____ | _____ |
-| _Guardrail_ | | _____ | _____ |
+## Step 3 · Craft your hypothesis
+- **Qualitative evidence (from M2) , quote the specific friction / moment of misery for your persona:** Dispatch reassignments take 8–15 minutes to reach the driver app, with no push notification on route change, resulting in drivers acting on stale routes and causing them to contact dispatchers outside the app.
+- **Quantitative evidence (from M3) , name the metric or data point that confirms the pain; cite the number:** The Scheduling for Drivers (1.9)  cell on the CSAT heatmap most directly maps to my persona's friction.
+- **Persona , role, goal, and the friction you confirmed in the reconciliation steps:** Driver, use the app to follow the route, receiving a timely update and push notification if the route has changed, Reassignments take 8-15 minutes to reach the driver app, with no push notification on route changes, resulting in drivers acting on stale routes. 
+Current workaround - Dispatch has to contact the driver outside the app to notify of route changes.
+- **Problem you are solving , one sentence describing the specific friction this initiative removes:** Eliminates drivers following outdated routes, causing them to waste time and have to contact dispatch outside of the app.
+- **Strategic outcome , what behaviour change do you expect, and how does it map to retention / revenue / churn?:** Use the app to follow the route, receiving a timely update and push notification if the route has changed, this would eliminate the need to have workarounds outside the app, be more efficient, which would give the driver and dispatchers more time for reporting and compliances.
+- **Primary success metric (initiative signal) , the leading indicator that tells you the gap is closing:** Drivers are no longer using manual workarounds because the app is successfully working.
+- **Guardrail metric (product signal) , the metric that must NOT drop; it protects your existing base:** Accounts citing complexity as churn reason, currently 4 of 5 accounts vs the previous 1 of 8 accounts two years prior.
+- **Decision window , how much time or data before you scale, pivot, or kill? minimum threshold to proceed?:** Two week adoption period before we scale or pivot. The minimum threshold to proceed is Drivers scheduling to 2.3, which is about a 20% increase. If we increase this metric, the other low metrics will follow.
+- **Draft your full hypothesis sentence , one to three sentences; quote the metric, name the persona, name the outcome:** Based on the app not updating routes quickly or sending push notifications, I believe that ensuring the app updates quickly with route changes and sends push notifications when dispatchers update the routes for drivers will result in the drivers working active routes and less time loss, as measured by a 20% change in the CSAT score for drivers scheduling. I will protect accounts citing complexity as churn reason and will make a go/no-go decision after two weeks.
