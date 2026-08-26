@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RouteLogic Velocity — A Frontline-First Dispatch View</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Lato:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07162C;
+    --bg-2:#0B1E3A;
+    --fg:#ffffff;
+    --muted:rgba(255,255,255,0.68);
+    --muted-2:rgba(255,255,255,0.45);
+    --orange:#fb923c;
+    --orange-eyebrow:#fdba74;
+    --cyan:#22d3ee;
+    --teal:#34d399;
+    --blue:#60a5fa;
+    --violet:#a78bfa;
+    --pink:#f472b6;
+    --border:rgba(251,146,60,0.25);
+    --card:rgba(255,255,255,0.03);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'Lato',sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    scroll-snap-type:y mandatory;
+    overflow-y:scroll;
+    height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::-webkit-scrollbar{width:0;}
+
+  h1,h2,h3,h4{font-family:'Poppins',sans-serif;letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  section{
+    min-height:100vh;
+    scroll-snap-align:start;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    position:relative;
+    padding:96px 8vw 72px;
+    overflow:hidden;
+  }
+  section::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 85% -10%, rgba(251,146,60,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 400px at -5% 110%, rgba(34,211,238,0.07), transparent 55%);
+    pointer-events:none;
+  }
+  .slide-inner{position:relative;z-index:1;max-width:1180px;margin:0 auto;width:100%;}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:var(--orange-eyebrow);
+    font-size:12.5px;
+    font-weight:500;
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px;height:1px;
+    background:var(--orange-eyebrow);
+    display:inline-block;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:28px 30px;
+  }
+  .card.hero{
+    background:linear-gradient(135deg, rgba(251,146,60,0.14), rgba(34,211,238,0.06));
+    box-shadow:0 20px 60px -20px rgba(251,146,60,0.25);
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13.5px;
+    font-weight:500;
+    padding:12px 22px;
+    border-radius:10px;
+    text-decoration:none;
+    border:1px solid var(--border);
+    color:var(--fg);
+    transition:transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px);border-color:rgba(251,146,60,0.55);}
+  .btn.primary{
+    background:linear-gradient(135deg,var(--orange),#f97316);
+    color:#1a0e02;
+    border-color:transparent;
+    font-weight:700;
+  }
+  .btn.primary:hover{box-shadow:0 12px 30px -10px rgba(251,146,60,0.6);}
+
+  .pill{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    padding:7px 14px;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,0.15);
+    color:var(--fg);
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    white-space:nowrap;
+  }
+  .pill .sw{width:7px;height:7px;border-radius:50%;}
+
+  /* ---------- Progress + nav ---------- */
+  #progress{
+    position:fixed;top:0;left:0;height:3px;
+    background:linear-gradient(90deg,var(--orange),var(--cyan));
+    width:0%;
+    z-index:100;
+    transition:width .08s linear;
+  }
+  #dotnav{
+    position:fixed;
+    right:26px;top:50%;
+    transform:translateY(-50%);
+    display:flex;flex-direction:column;gap:14px;
+    z-index:100;
+  }
+  #dotnav button{
+    width:9px;height:9px;border-radius:50%;
+    background:rgba(255,255,255,0.22);
+    border:none;cursor:pointer;
+    padding:0;
+    transition:background .2s ease, transform .2s ease;
+  }
+  #dotnav button.active{
+    background:var(--orange);
+    transform:scale(1.35);
+  }
+  @media(max-width:720px){#dotnav{display:none;}}
+
+  /* ---------- Slide 1: Cover ---------- */
+  #cover{justify-content:center;align-items:flex-start;}
+  #cover h1{
+    font-size:clamp(38px,5.6vw,68px);
+    font-weight:900;
+    line-height:1.06;
+    max-width:920px;
+    margin-bottom:22px;
+  }
+  #cover .pitch{
+    font-size:clamp(17px,2vw,21px);
+    color:var(--muted);
+    max-width:640px;
+    margin-bottom:36px;
+  }
+  #cover .meta-row{
+    display:flex;gap:14px;flex-wrap:wrap;align-items:center;
+    margin-bottom:40px;
+  }
+  #cover .name-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--muted);
+    border-left:2px solid var(--orange);
+    padding-left:12px;
+  }
+  #cover .actions{display:flex;gap:14px;flex-wrap:wrap;}
+
+  /* ---------- Slide 2: Strategy ---------- */
+  #strategy .grid{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:8px;}
+  #strategy h2{font-size:clamp(26px,3.2vw,36px);font-weight:800;margin-bottom:26px;}
+  #strategy .block h4{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;text-transform:uppercase;letter-spacing:0.08em;
+    color:var(--cyan);margin-bottom:10px;
+  }
+  #strategy .block p{color:var(--muted);font-size:15px;}
+  #strategy .callout{margin-top:26px;}
+  #strategy .callout h4{color:var(--orange-eyebrow);}
+  #strategy .metric{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:15px;color:var(--fg);font-weight:500;
+  }
+  #strategy .metric b{color:var(--orange);font-size:17px;}
+  @media(max-width:860px){#strategy .grid{grid-template-columns:1fr;}}
+
+  /* ---------- Slide 3: Research ---------- */
+  #research h2{font-size:clamp(26px,3.2vw,36px);font-weight:800;margin-bottom:26px;}
+  #research .top-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:28px;margin-bottom:34px;}
+  #research .top-grid p{color:var(--muted);font-size:15px;}
+  #research .top-grid h4{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;
+    letter-spacing:0.08em;color:var(--blue);margin-bottom:10px;
+  }
+  .journey{
+    display:flex;align-items:stretch;gap:0;overflow-x:auto;
+    padding-top:6px;
+  }
+  .journey .step{
+    flex:1 1 0;min-width:150px;
+    display:flex;flex-direction:column;gap:8px;
+    padding:16px 16px 18px;
+    position:relative;
+  }
+  .journey .step:not(:last-child)::after{
+    content:"→";
+    position:absolute;right:-4px;top:38px;
+    color:var(--muted-2);font-size:16px;
+  }
+  .journey .step .n{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-2);
+  }
+  .journey .step .t{font-size:13.5px;color:var(--muted);line-height:1.4;}
+  .journey .step.misery{
+    background:rgba(244,114,182,0.10);
+    border:1px solid rgba(244,114,182,0.4);
+    border-radius:12px;
+  }
+  .journey .step.misery .t{color:var(--fg);font-weight:600;}
+  .journey .step.misery .n{color:var(--pink);}
+  .journey .step.resolve{
+    background:rgba(52,211,153,0.10);
+    border:1px solid rgba(52,211,153,0.4);
+    border-radius:12px;
+  }
+  .journey .step.resolve .n{color:var(--teal);}
+
+  /* ---------- Slide 4: Blueprint ---------- */
+  #blueprint h2{font-size:clamp(26px,3.2vw,36px);font-weight:800;margin-bottom:8px;}
+  #blueprint .sub{color:var(--muted);font-size:14px;margin-bottom:26px;}
+  .moscow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
+  .moscow .col{border-radius:14px;padding:18px 16px;border:1px solid var(--border);background:var(--card);}
+  .moscow .col h4{font-family:'IBM Plex Mono',monospace;font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
+  .moscow .col p{font-size:13px;color:var(--muted);}
+  .moscow .col.must h4{color:var(--orange);}
+  .moscow .col.should h4{color:var(--cyan);}
+  .moscow .col.could h4{color:var(--teal);}
+  .moscow .col.wont{opacity:0.6;}
+  .moscow .col.wont h4{color:var(--muted-2);}
+  .moscow .col.wont p{text-decoration:line-through;text-decoration-color:var(--muted-2);}
+  #blueprint .bottom-grid{display:grid;grid-template-columns:1.3fr 0.7fr;gap:24px;align-items:stretch;}
+  #blueprint .prd h4{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;
+    letter-spacing:0.08em;color:var(--violet);margin-bottom:10px;
+  }
+  #blueprint .prd p{font-size:14.5px;color:var(--muted);margin-bottom:10px;}
+  #blueprint .proto-card{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:14px;}
+  #blueprint .proto-card .mono-note{font-size:12.5px;color:var(--muted-2);}
+  @media(max-width:900px){.moscow{grid-template-columns:1fr 1fr;} #blueprint .bottom-grid{grid-template-columns:1fr;}}
+
+  /* ---------- Slide 5: Validation ---------- */
+  #validation h2{font-size:clamp(26px,3.2vw,36px);font-weight:800;margin-bottom:26px;}
+  .exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px;}
+  .exp-cell{border:1px solid var(--border);border-radius:14px;padding:20px;background:var(--card);}
+  .exp-cell h4{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;
+    letter-spacing:0.07em;color:var(--muted-2);margin-bottom:10px;
+  }
+  .exp-cell p{font-size:14px;color:var(--fg);}
+  .exp-cell.metric-cell{background:linear-gradient(135deg, rgba(251,146,60,0.14), rgba(96,165,250,0.05));}
+  .exp-cell .big{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:var(--orange);}
+  .exp-cell .baseline{font-size:12.5px;color:var(--muted);margin-top:4px;}
+  .rules-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .rule{border-radius:12px;padding:14px 16px;font-size:13px;}
+  .rule.ship{background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.35);}
+  .rule.iterate{background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.35);}
+  .rule.kill{background:rgba(244,114,182,0.12);border:1px solid rgba(244,114,182,0.35);}
+  .rule b{font-family:'IBM Plex Mono',monospace;text-transform:uppercase;font-size:11px;letter-spacing:0.06em;display:block;margin-bottom:5px;}
+  .rule.ship b{color:var(--teal);}
+  .rule.iterate b{color:var(--blue);}
+  .rule.kill b{color:var(--pink);}
+  @media(max-width:860px){.exp-grid{grid-template-columns:1fr 1fr;} .rules-row{grid-template-columns:1fr;}}
+
+  /* ---------- Slide 6: Launch ---------- */
+  #launch h2{font-size:clamp(26px,3.2vw,36px);font-weight:800;margin-bottom:26px;}
+  #launch .gtm-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px;}
+  .dash-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px;}
+  .dash-tile{border:1px solid var(--border);border-radius:14px;padding:20px;background:var(--card);}
+  .dash-tile h4{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;
+    letter-spacing:0.07em;color:var(--muted-2);margin-bottom:10px;
+  }
+  .dash-tile p{font-size:14px;color:var(--muted);}
+  .bad-signal{
+    border-radius:14px;padding:18px 22px;
+    background:rgba(244,114,182,0.10);
+    border:1px solid rgba(244,114,182,0.4);
+    display:flex;gap:14px;align-items:flex-start;
+  }
+  .bad-signal .flag{color:var(--pink);font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0;margin-top:2px;}
+  .bad-signal p{font-size:14px;color:var(--fg);}
+  @media(max-width:860px){.dash-row{grid-template-columns:1fr;}}
+
+  /* ---------- Slide 7: Story ---------- */
+  #story h2{font-size:clamp(26px,3.2vw,36px);font-weight:800;margin-bottom:26px;}
+  #story .grid{display:grid;grid-template-columns:1fr 1fr;gap:30px;}
+  #story .block h4{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;
+    letter-spacing:0.08em;margin-bottom:12px;
+  }
+  #story .friction h4{color:var(--violet);}
+  #story .takeaway h4{color:var(--teal);}
+  #story .block p{color:var(--muted);font-size:15px;margin-bottom:12px;}
+  @media(max-width:860px){#story .grid{grid-template-columns:1fr;}}
+
+  /* ---------- Slide 8: Thank you ---------- */
+  #thanks{align-items:center;text-align:center;}
+  #thanks .slide-inner{display:flex;flex-direction:column;align-items:center;}
+  #thanks h2{font-size:clamp(30px,4vw,46px);font-weight:900;margin-bottom:16px;}
+  #thanks p.thanks-sub{color:var(--muted);font-size:16px;margin-bottom:32px;max-width:520px;}
+  #thanks .tag-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:34px;}
+  #thanks .submit-pill{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13.5px;font-weight:600;
+    padding:14px 28px;border-radius:30px;
+    background:linear-gradient(135deg,var(--orange),#f97316);
+    color:#1a0e02;text-decoration:none;
+    display:inline-flex;align-items:center;gap:10px;
+    box-shadow:0 16px 40px -14px rgba(251,146,60,0.55);
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<nav id="dotnav" aria-label="Slide navigation"></nav>
+
+<!-- 1 — COVER -->
+<section id="cover" data-title="Cover">
+  <div class="slide-inner">
+    <div class="eyebrow">Product Management Final Project</div>
+    <h1>RouteLogic Velocity<br>A Frontline-First Dispatch View</h1>
+    <p class="pitch">Strip the admin clutter into one real-time dispatch view so fleet coordinators reroute in seconds, not screens.</p>
+    <div class="meta-row">
+      <span class="name-tag">Katie Cooper · Product Management Cohort · Jun 2026</span>
+    </div>
+    <div class="actions">
+      <a class="btn primary" href="https://www.figma.com/your-velocity-prototype" target="_blank" rel="noopener">View prototype ↗</a>
+      <a class="btn" href="https://github.com/your-handle/pm-final-project" target="_blank" rel="noopener">GitHub repo ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- 2 — STRATEGY -->
+<section id="strategy" data-title="Strategy">
+  <div class="slide-inner">
+    <div class="eyebrow">05 · Strategy</div>
+    <h2>The tool coordinators built a workaround for.</h2>
+    <div class="grid">
+      <div class="block">
+        <h4>Problem</h4>
+        <p>Real-time fleet coordinators abandon RouteLogic mid-shift because live dispatch is buried under admin panels built for HQ. They fall back to spreadsheets and phone calls; the largest enterprise account is trialling a leaner competitor that calls RouteLogic "an administrative burden."</p>
+      </div>
+      <div class="block">
+        <h4>Value Proposition</h4>
+        <p>Velocity gives coordinators one focused, real-time view — live vehicle status, exceptions, and one-tap reroute — so the tool becomes the fastest way to run the shift instead of the slowest.</p>
+      </div>
+    </div>
+    <div class="card hero callout">
+      <h4 class="mono">Hypothesis</h4>
+      <p class="metric">We believe a streamlined real-time dispatch view for fleet coordinators will increase daily active use during shifts, measured by a <b>+15pt lift</b> in coordinator DAU within <b>30 days</b>, without reducing HQ admin feature usage.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 — RESEARCH -->
+<section id="research" data-title="Research">
+  <div class="slide-inner">
+    <div class="eyebrow">06 · Research</div>
+    <h2>Where coordinators peel off — and why.</h2>
+    <div class="top-grid">
+      <div>
+        <h4>Competitive Analysis / Workaround</h4>
+        <p>Coordinators cope by running the shift in spreadsheets and group texts, opening RouteLogic only to reconcile afterwards. Leaner competitors win with a mobile-first dispatch board; RouteLogic wins on depth but loses on speed at the moment of dispatch.</p>
+      </div>
+      <div>
+        <h4>Journey Map Insight</h4>
+        <p>Velocity surfaces a live dispatch board on open, before the coordinator reaches for the workaround — intercepting the moment of misery rather than reconciling after it.</p>
+      </div>
+    </div>
+    <div class="journey">
+      <div class="step">
+        <span class="n mono">01</span>
+        <span class="t">Shift starts</span>
+      </div>
+      <div class="step">
+        <span class="n mono">02</span>
+        <span class="t">Open console</span>
+      </div>
+      <div class="step">
+        <span class="n mono">03</span>
+        <span class="t">Hunt across admin-heavy tabs for live status</span>
+      </div>
+      <div class="step misery">
+        <span class="n mono">04 · MISERY</span>
+        <span class="t">Give up, switch to spreadsheet / phone</span>
+      </div>
+      <div class="step resolve">
+        <span class="n mono">05 · VELOCITY</span>
+        <span class="t">Live dispatch board surfaces on open</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 — BLUEPRINT -->
+<section id="blueprint" data-title="Blueprint">
+  <div class="slide-inner">
+    <div class="eyebrow">07 · Blueprint</div>
+    <h2>What ships, what waits, what we're not touching.</h2>
+    <p class="sub">Now / Next / Later — V1 board ships in 6 weeks, additive to the existing console.</p>
+    <div class="moscow">
+      <div class="col must">
+        <h4 class="mono">Must</h4>
+        <p>Real-time dispatch board + one-tap reroute.</p>
+      </div>
+      <div class="col should">
+        <h4 class="mono">Should</h4>
+        <p>Exception alerts and driver ETA.</p>
+      </div>
+      <div class="col could">
+        <h4 class="mono">Could</h4>
+        <p>Shift-handoff summary.</p>
+      </div>
+      <div class="col wont">
+        <h4 class="mono">Won't (Now)</h4>
+        <p>Rebuild of the HQ admin suite.</p>
+      </div>
+    </div>
+    <div class="bottom-grid">
+      <div class="card prd">
+        <h4>PRD Highlights</h4>
+        <p>A dedicated real-time dispatch view: live vehicle map, exception queue, and one-tap reroute, defaulting to the coordinator's assigned fleet.</p>
+        <p>No changes to existing admin/finance modules in V1 — the view is additive and preserves enterprise depth.</p>
+      </div>
+      <div class="card proto-card">
+        <span class="mono-note mono">Interactive prototype</span>
+        <a class="btn primary" href="https://www.figma.com/your-velocity-prototype" target="_blank" rel="noopener">View prototype ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 — VALIDATION -->
+<section id="validation" data-title="Validation">
+  <div class="slide-inner">
+    <div class="eyebrow">08 · Validation</div>
+    <h2>The experiment plan.</h2>
+    <div class="exp-grid">
+      <div class="exp-cell">
+        <h4>Design</h4>
+        <p>A/B test across matched depots, 50/50 split, 30 days.</p>
+      </div>
+      <div class="exp-cell">
+        <h4>Control vs. Variant</h4>
+        <p>Control: existing admin-first console. Variant: Velocity real-time dispatch view.</p>
+      </div>
+      <div class="exp-cell metric-cell">
+        <h4>Primary Metric</h4>
+        <div class="big mono">+15pt MDE</div>
+        <div class="baseline">Coordinator DAU during shifts · baseline 41%</div>
+      </div>
+    </div>
+    <div class="exp-cell" style="margin-bottom:18px;">
+      <h4>Guardrail</h4>
+      <p>HQ admin feature usage must not drop more than 3pt.</p>
+    </div>
+    <div class="rules-row">
+      <div class="rule ship"><b>Ship</b>Primary metric hits target with guardrail safe.</div>
+      <div class="rule iterate"><b>Iterate</b>Result is flat — revisit the design, don't kill it.</div>
+      <div class="rule kill"><b>Kill</b>Admin usage regresses beyond guardrail.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 — LAUNCH -->
+<section id="launch" data-title="Launch">
+  <div class="slide-inner">
+    <div class="eyebrow">09 · Launch</div>
+    <h2>Go-to-market and the signals that matter.</h2>
+    <div class="gtm-row">
+      <span class="pill"><span class="sw" style="background:var(--orange);"></span>Goal: Adoption</span>
+      <span class="pill"><span class="sw" style="background:var(--cyan);"></span>Audience: Real-time fleet coordinators, existing enterprise accounts</span>
+      <span class="pill"><span class="sw" style="background:var(--blue);"></span>Tier: L (revenue protection)</span>
+      <span class="pill"><span class="sw" style="background:var(--teal);"></span>Channel: CSM-led rollout (owned)</span>
+      <span class="pill"><span class="sw" style="background:var(--teal);"></span>Channel: In-app announcement (owned)</span>
+      <span class="pill"><span class="sw" style="background:var(--violet);"></span>Channel: Depot-manager enablement kit</span>
+      <span class="pill"><span class="sw" style="background:var(--pink);"></span>Enablement: 10-min onboarding + support macro</span>
+    </div>
+    <div class="dash-row">
+      <div class="dash-tile">
+        <h4>Coordinator DAU</h4>
+        <p>Tracked during shifts, against the 41% baseline.</p>
+      </div>
+      <div class="dash-tile">
+        <h4>Reroutes Completed In-App</h4>
+        <p>Direct measure of trust in the one-tap flow.</p>
+      </div>
+      <div class="dash-tile">
+        <h4>Time-to-First-Action</h4>
+        <p>How fast a coordinator acts after opening the view.</p>
+      </div>
+    </div>
+    <div class="bad-signal">
+      <span class="flag mono">Bad signal</span>
+      <p>Coordinators open Velocity but still finish the shift in spreadsheets — that means the board is not yet fast enough to trust.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 — STORY -->
+<section id="story" data-title="Story">
+  <div class="slide-inner">
+    <div class="eyebrow">10 · Story</div>
+    <h2>What this project taught me.</h2>
+    <div class="grid">
+      <div class="block friction">
+        <h4>Friction & Aha Moment</h4>
+        <p>The aha moment was realising the fix was subtraction, not features — coordinators did not need more power, they needed the live view unburied.</p>
+        <p>The hardest part was protecting enterprise depth while making the frontline view the default.</p>
+      </div>
+      <div class="block takeaway">
+        <h4>Key Takeaways / Next</h4>
+        <p>Biggest takeaway: for B2B tools, the workflow at the moment of decision beats feature breadth.</p>
+        <p>Next, I would instrument the reroute flow and A/B test exception-alert timing to cut time-to-action further.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 — THANK YOU -->
+<section id="thanks" data-title="Thank you">
+  <div class="slide-inner">
+    <div class="eyebrow">Thank you</div>
+    <h2>RouteLogic Velocity</h2>
+    <p class="thanks-sub">A frontline-first dispatch view — built to make the coordinator's shift faster, not just the platform bigger.</p>
+    <div class="tag-row">
+      <span class="pill"><span class="sw" style="background:var(--orange);"></span>Product Management Cohort · Jun 2026</span>
+      <a class="pill" href="https://github.com/your-handle/pm-final-project" target="_blank" rel="noopener" style="text-decoration:none;"><span class="sw" style="background:var(--cyan);"></span>github.com/your-handle/pm-final-project</a>
+    </div>
+    <a class="submit-pill" href="https://github.com/your-handle/pm-final-project" target="_blank" rel="noopener">Submit to the learning platform ↗</a>
+  </div>
+</section>
+
+<script>
+  const sections = Array.from(document.querySelectorAll('section'));
+  const progress = document.getElementById('progress');
+  const dotnav = document.getElementById('dotnav');
+
+  sections.forEach((sec, i) => {
+    const dot = document.createElement('button');
+    dot.setAttribute('aria-label', sec.dataset.title || ('Slide ' + (i+1)));
+    dot.addEventListener('click', () => sec.scrollIntoView({behavior:'smooth'}));
+    dotnav.appendChild(dot);
+  });
+  const dots = Array.from(dotnav.children);
+
+  function currentIndex(){
+    const y = window.scrollY + window.innerHeight/2;
+    let idx = 0;
+    sections.forEach((sec,i)=>{
+      if(sec.offsetTop <= y) idx = i;
+    });
+    return idx;
+  }
+
+  function updateUI(){
+    const doc = document.documentElement;
+    const max = document.body.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+    progress.style.width = pct + '%';
+    const idx = currentIndex();
+    dots.forEach((d,i)=> d.classList.toggle('active', i === idx));
+  }
+
+  window.addEventListener('scroll', updateUI, {passive:true});
+  window.addEventListener('resize', updateUI);
+  updateUI();
+
+  function goTo(idx){
+    idx = Math.max(0, Math.min(sections.length-1, idx));
+    sections[idx].scrollIntoView({behavior:'smooth'});
+  }
+
+  window.addEventListener('keydown', (e)=>{
+    const idx = currentIndex();
+    switch(e.key){
+      case 'ArrowDown':
+      case ' ':
+        e.preventDefault();
+        goTo(idx+1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        goTo(idx-1);
+        break;
+      case 'Home':
+        e.preventDefault();
+        goTo(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        goTo(sections.length-1);
+        break;
+      case 'Escape':
+        e.preventDefault();
+        goTo(0);
+        break;
+    }
+  });
+</script>
+
+</body>
+</html>
