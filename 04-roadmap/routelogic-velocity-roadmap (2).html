@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RouteLogic Velocity — Driver Friction Pilot Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF0F2;
+    --paper:#FFFFFF;
+    --ink:#14171A;
+    --ink-soft:#5B6167;
+    --ink-faint:#8A9096;
+    --asphalt:#1F2226;
+    --asphalt-2:#2B2F35;
+    --lane-yellow:#FFC53D;
+    --line:#DADFE3;
+
+    --quick-win:#1E9D5B;
+    --quick-win-bg:#E7F6EE;
+    --major-project:#4C5FD5;
+    --major-project-bg:#EBEDFC;
+    --fill-in:#B9820A;
+    --fill-in-bg:#FBF1DC;
+    --time-sinker:#D14343;
+    --time-sinker-bg:#FBEAEA;
+    --cut:#8A9096;
+    --cut-bg:#F1F2F3;
+
+    --radius:12px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .display{ font-family:'Barlow Condensed', sans-serif; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    background:var(--asphalt);
+    color:#fff;
+    padding:22px 40px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{
+    display:flex; align-items:center; justify-content:center;
+    width:44px; height:44px;
+    background:var(--lane-yellow);
+    color:var(--asphalt);
+    font-family:'Barlow Condensed', sans-serif;
+    font-weight:800;
+    font-size:20px;
+    border-radius:8px;
+    letter-spacing:0.5px;
+  }
+  .brand-name{
+    font-family:'Barlow Condensed', sans-serif;
+    font-weight:800;
+    font-size:26px;
+    letter-spacing:1px;
+    line-height:1;
+  }
+  .brand-sub{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:1.5px;
+    color:var(--lane-yellow);
+    margin-top:4px;
+  }
+  .meta{ display:flex; gap:28px; flex-wrap:wrap; }
+  .meta-item{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    line-height:1.5;
+    color:#D7DADD;
+  }
+  .meta-item span{
+    display:block;
+    font-size:10px;
+    letter-spacing:1.5px;
+    color:var(--lane-yellow);
+    margin-bottom:2px;
+  }
+
+  /* ---------- Lane divider (signature element) ---------- */
+  .lane-divider{
+    height:10px;
+    background:var(--asphalt);
+    background-image:repeating-linear-gradient(
+      90deg,
+      var(--lane-yellow) 0px, var(--lane-yellow) 26px,
+      transparent 26px, transparent 46px
+    );
+    background-position:center;
+    background-repeat:repeat-x;
+    background-size:46px 3px;
+    background-position-y:center;
+  }
+
+  /* ---------- Filter bar ---------- */
+  .filterbar{
+    max-width:1160px;
+    margin:0 auto;
+    padding:22px 40px 4px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .filterbar .flabel{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:1px;
+    color:var(--ink-faint);
+    margin-right:6px;
+  }
+  .fbtn{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:6px 13px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-family:'Inter', sans-serif;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .fbtn:hover{ border-color:var(--ink-faint); }
+  .fbtn.active{
+    color:#fff;
+    border-color:transparent;
+  }
+  .fbtn .dot{ width:8px; height:8px; border-radius:50%; }
+  .fbtn[data-q="all"].active{ background:var(--asphalt); }
+  .fbtn[data-q="quick-win"].active{ background:var(--quick-win); }
+  .fbtn[data-q="major-project"].active{ background:var(--major-project); }
+  .fbtn[data-q="fill-in"].active{ background:var(--fill-in); }
+  .fbtn[data-q="time-sinker"].active{ background:var(--time-sinker); }
+  .fbtn[data-q="quick-win"] .dot{ background:var(--quick-win); }
+  .fbtn[data-q="major-project"] .dot{ background:var(--major-project); }
+  .fbtn[data-q="fill-in"] .dot{ background:var(--fill-in); }
+  .fbtn[data-q="time-sinker"] .dot{ background:var(--time-sinker); }
+  .fbtn[data-q="all"] .dot{ background:var(--asphalt); }
+
+  /* ---------- Lanes ---------- */
+  main{ max-width:1160px; margin:0 auto; padding:8px 40px 60px; }
+
+  .lane{ padding:30px 0 6px; }
+
+  .lane-head{
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .lane-tag{
+    font-family:'Barlow Condensed', sans-serif;
+    font-weight:800;
+    font-size:15px;
+    letter-spacing:2px;
+    background:var(--asphalt);
+    color:var(--lane-yellow);
+    padding:6px 14px;
+    border-radius:6px;
+  }
+  .lane-window{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+
+  .card-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+    gap:16px;
+  }
+
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px 18px 16px;
+    transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+  }
+  .card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(20,23,26,0.08);
+  }
+  .card.dimmed{ opacity:0.28; }
+
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .card-id{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-faint);
+    display:block;
+    margin-bottom:3px;
+  }
+  .card-name{
+    font-family:'Barlow Condensed', sans-serif;
+    font-weight:700;
+    font-size:19px;
+    line-height:1.15;
+    margin:0;
+  }
+  .badge{
+    flex-shrink:0;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+    font-size:10.5px;
+    letter-spacing:0.4px;
+    padding:5px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .badge-quick-win{ color:var(--quick-win); background:var(--quick-win-bg); }
+  .badge-major-project{ color:var(--major-project); background:var(--major-project-bg); }
+  .badge-fill-in{ color:var(--fill-in); background:var(--fill-in-bg); }
+  .badge-time-sinker{ color:var(--time-sinker); background:var(--time-sinker-bg); }
+
+  .rationale{
+    font-size:13.5px;
+    line-height:1.55;
+    color:var(--ink-soft);
+    margin:0;
+  }
+
+  /* ---------- Cut list ---------- */
+  .cut-section{
+    margin-top:36px;
+    padding-top:26px;
+    border-top:2px dashed var(--line);
+  }
+  .cut-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .cut-tag{
+    font-family:'Barlow Condensed', sans-serif;
+    font-weight:800;
+    font-size:14px;
+    letter-spacing:2px;
+    color:var(--cut);
+    border:1.5px solid var(--cut);
+    padding:5px 12px;
+    border-radius:6px;
+  }
+  .cut-note{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-faint);
+  }
+  .cut-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+    gap:14px;
+  }
+  .cut-card{
+    background:var(--cut-bg);
+    border:1px dashed var(--line);
+    border-radius:var(--radius);
+    padding:16px 18px;
+  }
+  .cut-card .card-name{ color:var(--ink-faint); text-decoration:line-through; text-decoration-color:var(--cut); text-decoration-thickness:1.5px; }
+  .cut-card .rationale{ color:var(--ink-faint); }
+
+  footer{
+    text-align:center;
+    padding:26px 20px 40px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.8px;
+    color:var(--ink-faint);
+  }
+
+  @media (max-width:640px){
+    .topbar{ padding:18px 20px; }
+    .filterbar{ padding:18px 20px 4px; }
+    main{ padding:8px 20px 40px; }
+    .brand-name{ font-size:22px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">RL</div>
+      <div>
+        <div class="brand-name">ROUTELOGIC</div>
+        <div class="brand-sub">VELOCITY · DRIVER FRICTION PILOT</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="meta-item"><span>TEAM</span>2 engineers · 1 designer · 1 CS lead</div>
+      <div class="meta-item"><span>PILOT WINDOW</span>4 weeks · 3 accounts</div>
+      <div class="meta-item"><span>GA TARGET</span>Weeks 5–8</div>
+    </div>
+  </div>
+  <div class="lane-divider"></div>
+
+  <div class="filterbar">
+    <span class="flabel">FILTER</span>
+    <button class="fbtn active" data-q="all"><span class="dot"></span>All</button>
+    <button class="fbtn" data-q="quick-win"><span class="dot"></span>Quick Win</button>
+    <button class="fbtn" data-q="major-project"><span class="dot"></span>Major Project</button>
+    <button class="fbtn" data-q="fill-in"><span class="dot"></span>Fill-In</button>
+    <button class="fbtn" data-q="time-sinker"><span class="dot"></span>Time Sinker</button>
+  </div>
+
+  <main>
+
+    <!-- NOW -->
+    <section class="lane">
+      <div class="lane-head">
+        <span class="lane-tag">NOW</span>
+        <span class="lane-window">Pilot · Weeks 1–4 · 3 accounts</span>
+      </div>
+      <div class="card-row">
+
+        <article class="card" data-quadrant="quick-win">
+          <div class="card-top">
+            <div>
+              <span class="card-id">B1</span>
+              <h3 class="card-name">One-Click Compliance Checklist</h3>
+            </div>
+            <span class="badge badge-quick-win">Quick Win</span>
+          </div>
+          <p class="rationale">Genuine driver time-save (14.6 min) with mostly plumbing/form work — low complexity risk, so it doesn't threaten the guardrail. Doesn't move the primary metric, but cheap enough to bundle into the pilot.</p>
+        </article>
+
+        <article class="card" data-quadrant="quick-win">
+          <div class="card-top">
+            <div>
+              <span class="card-id">B6</span>
+              <h3 class="card-name">Driver Alert Notifications</h3>
+            </div>
+            <span class="badge badge-quick-win">Quick Win</span>
+          </div>
+          <p class="rationale">Directly attacks the Moment of Misery — push alerts replace the texts/calls dispatchers currently use to reach drivers. If route/schedule-change alerts route drivers back into the app, this is also the most direct lever on the Scheduling adoption metric.</p>
+        </article>
+
+      </div>
+    </section>
+
+    <div class="lane-divider"></div>
+
+    <!-- NEXT -->
+    <section class="lane">
+      <div class="lane-head">
+        <span class="lane-tag">NEXT</span>
+        <span class="lane-window">GA Release · Weeks 5–8</span>
+      </div>
+      <div class="card-row">
+
+        <article class="card" data-quadrant="major-project">
+          <div class="card-top">
+            <div>
+              <span class="card-id">B3</span>
+              <h3 class="card-name">Shift Handoff Wizard</h3>
+            </div>
+            <span class="badge badge-major-project">Major Project</span>
+          </div>
+          <p class="rationale">Handoff is precisely where driver↔dispatcher coordination breaks down into off-app workarounds. 6.8 min/day saved is real driver friction, buildable by a 2-eng/1-designer team inside 4 weeks.</p>
+        </article>
+
+      </div>
+    </section>
+
+    <div class="lane-divider"></div>
+
+    <!-- LATER -->
+    <section class="lane">
+      <div class="lane-head">
+        <span class="lane-tag">LATER</span>
+        <span class="lane-window">Backlog · unscheduled</span>
+      </div>
+      <div class="card-row">
+
+        <article class="card" data-quadrant="time-sinker">
+          <div class="card-top">
+            <div>
+              <span class="card-id">B2</span>
+              <h3 class="card-name">Smart Daily Report Auto-Fill</h3>
+            </div>
+            <span class="badge badge-time-sinker">Time Sinker</span>
+          </div>
+          <p class="rationale">AI auto-fill is high engineering lift and higher failure surface — exactly the kind of "does everything" complexity that trips your churn guardrail. Doesn't touch Scheduling adoption or the misery moment. Cut for this pilot.</p>
+        </article>
+
+        <article class="card" data-quadrant="fill-in">
+          <div class="card-top">
+            <div>
+              <span class="card-id">B5</span>
+              <h3 class="card-name">Step Progress Indicator</h3>
+            </div>
+            <span class="badge badge-fill-in">Fill-In</span>
+          </div>
+          <p class="rationale">Cosmetic. Ships if there's spare designer bandwidth in week 4; never displaces a Quick Win.</p>
+        </article>
+
+        <article class="card" data-quadrant="fill-in">
+          <div class="card-top">
+            <div>
+              <span class="card-id">B7</span>
+              <h3 class="card-name">Contextual AI ETA Display</h3>
+            </div>
+            <span class="badge badge-fill-in">Fill-In</span>
+          </div>
+          <p class="rationale">Already live at 11% adoption — that's a demand signal, not a build problem. Low effort to iterate, but not worth pilot focus until you know why adoption is low.</p>
+        </article>
+
+        <article class="card" data-quadrant="fill-in">
+          <div class="card-top">
+            <div>
+              <span class="card-id">B9</span>
+              <h3 class="card-name">Compliance Audit Trail Export</h3>
+            </div>
+            <span class="badge badge-fill-in">Fill-In</span>
+          </div>
+          <p class="rationale">Useful for CS/back-office relationships, cheap to ship, but doesn't touch the driver's daily friction or the metric you're pilot-scoring against.</p>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- CUT LIST -->
+    <section class="cut-section">
+      <div class="cut-head">
+        <span class="cut-tag">CUT</span>
+        <span class="cut-note">Removed from this pilot's scope — not the roadmap</span>
+      </div>
+      <div class="cut-row">
+
+        <article class="cut-card">
+          <span class="card-id">B4</span>
+          <h3 class="card-name">Mobile-First Coordinator Dashboard</h3>
+          <p class="rationale">Would meaningfully reduce off-app coordination, but it's Coordinator-facing (not the Driver persona), spans three modules, and is not a 4-week/2-engineer scope. Right initiative, wrong pilot.</p>
+        </article>
+
+        <article class="cut-card">
+          <span class="card-id">B8</span>
+          <h3 class="card-name">Fleet Analytics Manager View</h3>
+          <p class="rationale">Classic Sales/Exec-preference feature — no driver benefit, no tie to the primary metric or misery moment. Ruthlessly deprioritize regardless of who's asking for it.</p>
+        </article>
+
+        <article class="cut-card">
+          <span class="card-id">B10</span>
+          <h3 class="card-name">In-App Coordinator Training</h3>
+          <p class="rationale">Coordinator-facing, not Driver. Marginal guardrail benefit (could reduce complexity-driven churn) but too indirect to earn scarce eng time this cycle.</p>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>ROUTELOGIC VELOCITY — PRIORITIZED AGAINST DRIVER FRICTION, NOT SALES OR ENGINEERING PREFERENCE</footer>
+
+<script>
+  const buttons = document.querySelectorAll('.fbtn');
+  const cards = document.querySelectorAll('.card');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const q = btn.dataset.q;
+
+      cards.forEach(card => {
+        if (q === 'all' || card.dataset.quadrant === q) {
+          card.classList.remove('dimmed');
+        } else {
+          card.classList.add('dimmed');
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
